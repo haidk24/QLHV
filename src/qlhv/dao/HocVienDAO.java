@@ -10,4 +10,5 @@ import qlhv.model.HocVien;
 public interface HocVienDAO {
     public List<HocVien> getList();
     public int createOrUpdate(HocVien hocVien);
+    public boolean delete(int maHocVien);
 }

@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import qlhv.model.HocVien;
 import qlhv.service.HocVienService;
 import qlhv.service.HocVienServiceImpl;
@@ -21,6 +22,7 @@ import qlhv.service.HocVienServiceImpl;
  */
 public class HocVienController {
     private  JButton btnSubmit;
+    private JButton btnDelete;
     private JTextField jtfMaHocVien;
     private  JTextField jtfHoTen;
     private  JDateChooser jdcNgaySinh;
@@ -37,8 +39,9 @@ public class HocVienController {
     
     private HocVienService hocVienService= null;
 
-    public HocVienController(JButton btnSubmit, JTextField jtfMaHocVien, JTextField jtfHoTen, JDateChooser jdcNgaySinh, JRadioButton jrdNam,
+    public HocVienController(JButton btnSubmit, JButton btnDelete, JTextField jtfMaHocVien, JTextField jtfHoTen, JDateChooser jdcNgaySinh, JRadioButton jrdNam,
             JRadioButton jrdNu, JTextField jtfSoDienThoai, JTextArea jtaDiaChi, JCheckBox jcbTinhTrang, JLabel jlbMsg, JLabel jlbErrorNgaySinh, JLabel jlbErrorHoTen) {
+        this.btnDelete= btnDelete;
         this.btnSubmit = btnSubmit;
         this.jtfMaHocVien = jtfMaHocVien;
         this.jtfHoTen = jtfHoTen;
@@ -106,6 +109,36 @@ public class HocVienController {
                         jtfMaHocVien.setText("#"+lastId);
                        jlbMsg.setText("Cập nhật dữ liệu thành công!"); 
                     }
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnSubmit.setBackground(new Color(0, 200, 83));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnSubmit.setBackground(new Color(100, 221, 23));
+            }
+            
+        });
+        btnDelete.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    boolean deleted = hocVienService.delete(hocVien.getMa_hoc_vien());
+                    if (deleted) {
+                        jlbMsg.setText("Xóa học viên thành công!");
+                        // Đóng frame sau khi xóa
+                        //SwingUtilities.getWindowAncestor(btnDelete).dispose();
+                    } else {
+                        jlbMsg.setText("Lỗi: Không thể xóa học viên!");
+                    }
+                } catch (Exception ex) {
+                    System.out.println("Lỗi: " + ex.getMessage());
+                    ex.printStackTrace();
+                    jlbMsg.setText("Lỗi: " + ex.getMessage());
                 }
             }
 

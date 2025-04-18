@@ -16,7 +16,7 @@ public class DBConnect {
             Connection cons = null;
             Class.forName("com.mysql.cj.jdbc.Driver");
             cons = DriverManager.getConnection(
-                   "jdbc:mysql://localhost:3306/db_qlhv?useSSL=false&serverTimezone=UTC", "root", "241104");
+                   "jdbc:mysql://localhost:3305/db_qlhv?useSSL=false&serverTimezone=UTC", "root", "Hoanttfc2k5");
             return cons;
         } catch (Exception e) {
             e.printStackTrace();
