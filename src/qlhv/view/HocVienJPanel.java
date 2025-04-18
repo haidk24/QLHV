@@ -13,6 +13,7 @@ public class HocVienJPanel extends javax.swing.JPanel {
         
         QuanLyHocVienController controller = new QuanLyHocVienController(jpnView, btnAdd, jtfSearch);
         controller.setDateToTable();
+        controller.setEvent();
     }
 
     /**
