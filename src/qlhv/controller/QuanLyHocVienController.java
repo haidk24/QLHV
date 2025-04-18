@@ -6,12 +6,21 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Date;
 import java.util.List;
+import javafx.scene.control.Cell;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
@@ -19,6 +28,11 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import qlhv.model.HocVien;
 import qlhv.service.HocVienService;
 import qlhv.service.HocVienServiceImpl;
@@ -33,6 +47,7 @@ public class QuanLyHocVienController {
     private JPanel jpnView;
     private JButton btnAdd;
     private JTextField jtfSearch;
+    private JButton btnPrint;
     
     private HocVienService hocVienService= null;
     
@@ -40,10 +55,11 @@ public class QuanLyHocVienController {
     
     private TableRowSorter<TableModel> rowSorter= null;
 
-    public QuanLyHocVienController(JPanel jpnView, JButton btnAdd, JTextField jtfSearch) {
+    public QuanLyHocVienController(JPanel jpnView, JButton btnAdd, JTextField jtfSearch,JButton btnPrint) {
         this.jpnView = jpnView;
         this.btnAdd = btnAdd;
         this.jtfSearch = jtfSearch;
+        this.btnPrint=btnPrint;
         
         this.hocVienService= new HocVienServiceImpl();
     }
@@ -162,6 +178,92 @@ public class QuanLyHocVienController {
                 btnAdd.setBackground(new Color(100, 221, 23));
             }
         });
+        
+btnPrint.addMouseListener(new MouseAdapter(){
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        XSSFWorkbook workbook = null;
+        FileOutputStream out = null;
+        
+        try {
+            // 1. Tạo workbook và sheet
+            workbook = new XSSFWorkbook();
+            XSSFSheet sheet = workbook.createSheet("Học viên");
+
+            // 2. Tạo tiêu đề
+            String[] headers = {"STT", "Họ và tên", "Ngày sinh", "Giới tính", "Số điện thoại", "Địa chỉ"};
+            XSSFRow headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                XSSFCell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+            }
+
+            // 3. Thêm dữ liệu
+            List<HocVien> listItem = hocVienService.getList();
+            for (int i = 0; i < listItem.size(); i++) {
+                HocVien hocVien = listItem.get(i);
+                XSSFRow row = sheet.createRow(i + 1);
+                
+                // Xử lý dữ liệu null
+                row.createCell(0).setCellValue(i + 1);
+                row.createCell(1).setCellValue(hocVien.getHo_ten() != null ? hocVien.getHo_ten() : "");
+                row.createCell(2).setCellValue(hocVien.getNgay_sinh() != null ? hocVien.getNgay_sinh().toString() : "");
+                row.createCell(3).setCellValue(hocVien.isGioi_tinh() ? "Nam" : "Nữ");
+                row.createCell(4).setCellValue(hocVien.getSo_dien_thoai() != null ? hocVien.getSo_dien_thoai() : "");
+                row.createCell(5).setCellValue(hocVien.getDia_chi() != null ? hocVien.getDia_chi() : "");
+            }
+
+            // 4. Tự động điều chỉnh cột
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            // 5. Chọn nơi lưu file bằng JFileChooser
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Chọn vị trí lưu file");
+            fileChooser.setSelectedFile(new File("Danh_sach_hoc_vien.xlsx"));
+            
+            int userChoice = fileChooser.showSaveDialog(null);
+            if (userChoice == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                String filePath = selectedFile.getAbsolutePath();
+                
+                // Đảm bảo có đuôi .xlsx
+                if (!filePath.endsWith(".xlsx")) {
+                    selectedFile = new File(filePath + ".xlsx");
+                }
+                
+                // 6. Ghi file
+                out = new FileOutputStream(selectedFile);
+                workbook.write(out);
+                
+                JOptionPane.showMessageDialog(null, 
+                    "Xuất file thành công!\nĐường dẫn: " + selectedFile.getAbsolutePath(),
+                    "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (Exception ex) {
+            // Hiển thị chi tiết lỗi
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            String errorDetails = sw.toString();
+            
+            JTextArea textArea = new JTextArea(errorDetails);
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            scrollPane.setPreferredSize(new Dimension(500, 300));
+            
+            JOptionPane.showMessageDialog(null, scrollPane, 
+                "Lỗi khi xuất file", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            try {
+                if (out != null) out.close();
+                if (workbook != null) workbook.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+});
+        
     }
 }
 
