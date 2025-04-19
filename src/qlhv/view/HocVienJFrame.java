@@ -17,7 +17,6 @@ public class HocVienJFrame extends javax.swing.JFrame {
         HocVienController controller= new HocVienController(btnSubmit, btnDelete, jtfMaHocVien, jtfHoTen, jdcNgaySinh, jrdNam, jrdNu, 
                 jtfSoDienThoai, jtaDiaChi, jcbTinhTrang, jlbMsg, jlbErrorNgaySinh, jlbErrorHoTen);
         controller.setView(hocVien);
-        System.out.println(hocVien.getMa_hoc_vien());
         controller.setEvent();
     }
 
@@ -253,7 +252,7 @@ public class HocVienJFrame extends javax.swing.JFrame {
                     .addComponent(jlbMsg, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(55, 55, 55)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGap(10, 10, 10))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
